@@ -51,7 +51,7 @@
             }
         }    
         }
-        const form = document.querySelector('.marketingForm'); // select the form element
+        const form = document.querySelector('.marketingForm'); // select the main form element
         const allFormFields = form.querySelectorAll('form input, form select, form textarea, form checkbox'); // select all fields in the form
         const formAllFieldArray = [];
         
