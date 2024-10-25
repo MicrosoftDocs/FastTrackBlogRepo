@@ -1,0 +1,931 @@
+<!DOCTYPE html><html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://go.microsoft.com/fwlink/?linkid=2224838" data-comment="Form extensibility documentation" rel="author">
+    <title>Marketing Form</title>
+    <meta name="referrer" content="never">
+    <meta type="xrm/designer/setting" name="type" value="marketing-designer-content-editor-document">
+    <meta type="xrm/designer/setting" name="layout-editable" value="marketing-designer-layout-editable">
+    <style>
+        .editor-control-layout html {
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+
+        .editor-control-layout *,
+        .editor-control-layout *:before,
+        .editor-control-layout *:after {
+            box-sizing: inherit;
+        }
+
+        .marketingForm h1 {
+            color: #000;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            font-family: "Segoe UI", Arial, sans-serif;
+            line-height: 1.25;
+            font-size: 28px;
+        }
+
+        .marketingForm h2 {
+            color: #333;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            line-height: 1.25;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 22px;
+        }
+
+        .marketingForm h3 {
+            color: #000;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            line-height: 1.25;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 18px;
+        }
+
+        .marketingForm p {
+            margin: 0px;
+            padding: 0px;
+            line-height: 125%;
+            line-height: 1.25;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .marketingForm a,
+        div[data-editorblocktype="Captcha"] td:nth-of-type(2) a {
+            text-decoration: none;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .marketingForm .primaryButtonWrapper,
+        .submitButtonWrapper {
+            text-align: center;
+            margin: 10px 0px;
+        }
+
+        .marketingForm .primaryButton,
+        .submitButton {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 22px;
+            background-color: #2266e3;
+            border: none;
+            border-radius: 4px;
+            color: #ffffff;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .marketingForm .secondaryButton {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 22px;
+            background-color: #ffffff;
+            border: 1px solid #0082dd;
+            border-radius: 4px;
+            color: #2266e3;
+            padding: 10px 20px;
+            margin: 0px;
+            cursor: pointer;
+        }
+
+        .marketingForm .error {
+            font-family: Arial, Verdana, sans-serif;
+            font-weight: bold;
+            font-size: 8px;
+            margin: 0px;
+            padding: 0px;
+            color: #a80000;
+        }
+
+        .zero-state-container span {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-weight: 600;
+            font-size: 20px;
+            line-height: 26px;
+            color: #242424;
+        }
+
+        form.marketingForm {
+            color: #000;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        [data-layout="true"] {
+            margin: 0 auto;
+            max-width: 600px;
+            background-color: rgba(255, 255, 255, 0);
+        }
+
+        div[data-editorblocktype="SubmitButton"] {
+            padding: 20px 12%;
+        }
+
+        div[data-editorblocktype="Captcha"] {
+            padding: 20px 12%;
+        }
+
+        div[data-editorblocktype="Captcha"] table,
+        div[data-editorblocktype="Captcha"] div>table>tbody>tr>td:nth-of-type(2) {
+            width: 100% !important;
+        }
+
+        div[data-editorblocktype="Captcha"] div>div>table>tbody>tr:first-of-type>td:last-of-type {
+            padding-bottom: 12px !important;
+        }
+
+        div[data-editorblocktype="Captcha"] tr[id="wlspispHIPErrorContainer"] {
+            margin-top: 20px;
+        }
+
+        div[data-editorblocktype="Captcha"] tr[id="wlspispHIPErrorContainer"] td:nth-of-type(2) {
+            width: auto !important;
+        }
+
+        div[data-editorblocktype="Captcha"] tr[id="wlspispHIPErrorContainer"] img {
+            display: flex;
+        }
+
+        div[data-editorblocktype="Captcha"] td:nth-of-type(2)>div>div {
+            margin-top: 4px;
+        }
+
+        div[data-editorblocktype="Captcha"] td:nth-of-type(2)>div>div * {
+            font-weight: 400;
+        }
+
+        div[data-editorblocktype="Captcha"] td:nth-of-type(2)>div>div b {
+            color: #797775;
+        }
+
+        div[data-editorblocktype="Captcha"] tr:nth-of-type(2)>td {
+            height: 0px !important;
+        }
+
+        div[data-editorblocktype="Captcha"] td input {
+            margin-top: 20px !important;
+            padding: 6px 8px !important;
+            width: 100% !important;
+        }
+
+        div[data-editorblocktype="Captcha"] div[id^="wlspaudioBtnHolder"] {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        div[data-editorblocktype="About"],
+        div[data-editorblocktype="Sessions"],
+        div[data-editorblocktype="Speakers"] {
+            padding: 32px 24px;
+        }
+
+        .textFormFieldBlock,
+        .dateTimeFormFieldBlock,
+        .twoOptionFormFieldBlock,
+        .optionSetFormFieldBlock,
+        .multiOptionSetFormFieldBlock,
+        .lookupFormFieldBlock {
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        table.multi .textFormFieldBlock,
+        table.multi .dateTimeFormFieldBlock,
+        table.multi .twoOptionFormFieldBlock,
+        table.multi .optionSetFormFieldBlock,
+        table.multi .multiOptionSetFormFieldBlock,
+        table.multi .lookupFormFieldBlock {
+            padding: 12px 20px;
+        }
+
+        .consentBlock {
+            padding: 4px 30px;
+        }
+
+        .textFormFieldBlock label,
+        .dateTimeFormFieldBlock label,
+        .lookupFormFieldBlock label,
+        .twoOptionFormFieldBlock label.block-label,
+        .optionSetFormFieldBlock label.block-label,
+        .multiOptionSetFormFieldBlock label.block-label,
+        div[data-editorblocktype="Captcha"] label[id^="wlspispHipInstructionContainer"],
+        .textFormFieldBlock label *,
+        .dateTimeFormFieldBlock label *,
+        .lookupFormFieldBlock label *,
+        .twoOptionFormFieldBlock label.block-label *,
+        .optionSetFormFieldBlock label.block-label *,
+        .multiOptionSetFormFieldBlock label.block-label *,
+        .eventSession label *,
+        .consentBlock label p {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #323130;
+        }
+
+        .textFormFieldBlock label,
+        .dateTimeFormFieldBlock label,
+        .lookupFormFieldBlock label,
+        .twoOptionFormFieldBlock label.block-label,
+        .optionSetFormFieldBlock label.block-label,
+        .multiOptionSetFormFieldBlock label.block-label,
+        div[data-editorblocktype="Captcha"] label[id^="wlspispHipInstructionContainer"] {
+            display: inline-block;
+            margin-top: 4px;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+            padding: 0px;
+            flex: 1;
+            width: 100%;
+        }
+
+        .textFormFieldBlock label>*,
+        .dateTimeFormFieldBlock label>*,
+        .lookupFormFieldBlock label>*,
+        .twoOptionFormFieldBlock label.block-label>*,
+        .optionSetFormFieldBlock label.block-label>*,
+        .multiOptionSetFormFieldBlock label.block-label>*,
+        .eventSession label>*,
+        .consentBlock label>* {
+            display: inline-block;
+        }
+
+        .textFormFieldBlock label::after,
+        .twooption_checkbox label::after,
+        .dateTimeFormFieldBlock label::after,
+        .lookupFormFieldBlock label::after,
+        .twoOptionFormFieldBlock label.block-label::after,
+        .twoOptionFormFieldBlock div.twooption_checkbox label::after,
+        .optionSetFormFieldBlock label.block-label::after,
+        .multiOptionSetFormFieldBlock label.block-label::after,
+        .consentBlock label p:first-of-type::after,
+        .eventSession label::after,
+        div[data-editorblocktype="Captcha"] label[id^="wlspispHipInstructionContainer"]::after {
+            width: 22px;
+            display: inline-block;
+            line-height: 22px;
+            text-align: center;
+            color: #c33400;
+            content: "*";
+            visibility: hidden;
+        }
+
+        div[data-required].textFormFieldBlock label::after,
+        div[data-required].dateTimeFormFieldBlock label::after,
+        div[data-required].lookupFormFieldBlock label::after,
+        div[data-required] div.twooption_checkbox label::after,
+        div[data-required] label.block-label::after,
+        div[data-required="true"].consentBlock label p:first-of-type::after,
+        div[data-editorblocktype="Captcha"] label[id^="wlspispHipInstructionContainer"]::after {
+            visibility: visible;
+        }
+
+        .optionSetFormFieldBlock select,
+        .textFormFieldBlock input,
+        .dateTimeFormFieldBlock input,
+        .lookupFormFieldBlock input,
+        .marketingForm textarea,
+        div[data-editorblocktype="Captcha"] input {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            padding: 6px 8px;
+            background-color: #faf9f8;
+            border: 1px solid #e1dfdd;
+            border-radius: 2px;
+            display: block;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+            flex: 2 1 20%;
+        }
+
+        .optionSetFormFieldBlock select,
+        .textFormFieldBlock input::placeholder,
+        .dateTimeFormFieldBlock input,
+        .lookupFormFieldBlock input::placeholder,
+        .marketingForm textarea::placeholder,
+        div[data-editorblocktype="Captcha"] input::placeholder {}
+
+        .textFormFieldBlock textArea {
+            resize: vertical;
+            height: 120px;
+        }
+
+        .lookupFormFieldBlock input {
+            background-image: url(data\003a image/svg+xml\003b base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDQ4IDIwNDgiPjxwYXRoIGQ9Ik0xMzQ0IDBxOTcgMCAxODcgMjV0MTY4IDcxIDE0MiAxMTAgMTExIDE0MyA3MSAxNjggMjUgMTg3cTAgOTctMjUgMTg3dC03MSAxNjgtMTEwIDE0Mi0xNDMgMTExLTE2OCA3MS0xODcgMjVxLTEyNSAwLTIzOS00MnQtMjExLTEyMWwtNzg1IDc4NHEtMTkgMTktNDUgMTl0LTQ1LTE5LTE5LTQ1cTAtMjYgMTktNDVsNzg0LTc4NXEtNzktOTYtMTIxLTIxMHQtNDItMjQwcTAtOTcgMjUtMTg3dDcxLTE2OCAxMTAtMTQyVDk4OSA5NnQxNjgtNzEgMTg3LTI1em0wIDEyODBxMTE5IDAgMjI0LTQ1dDE4My0xMjQgMTIzLTE4MyA0Ni0yMjRxMC0xMTktNDUtMjI0dC0xMjQtMTgzLTE4My0xMjMtMjI0LTQ2cS0xMTkgMC0yMjQgNDVUOTM3IDI5NyA4MTQgNDgwdC00NiAyMjRxMCAxMTkgNDUgMjI0dDEyNCAxODMgMTgzIDEyMyAyMjQgNDZ6Ii8+PC9zdmc+);
+            background-repeat: no-repeat;
+            background-position-x: 98%;
+            background-position-y: center;
+            background-size: 1em 1em;
+        }
+
+        .optionSetFormFieldBlock select {
+            background-image: url(data\003a image/svg+xml\003b base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iNyIgdmlld0JveD0iMCAwIDEyIDciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik02IDYuNzA4OThMMC4xNDY0ODQgMC44NTU0NjlMMC44NTU0NjkgMC4xNDY0ODRMNiA1LjI5MTAyTDExLjE0NDUgMC4xNDY0ODRMMTEuODUzNSAwLjg1NTQ2OUw2IDYuNzA4OThaIiBmaWxsPSIjNjA1RTVDIi8+Cjwvc3ZnPgo=);
+            background-repeat: no-repeat;
+            background-position-x: 98%;
+            background-position-y: center;
+            appearance: none;
+        }
+
+        .optionSetFormFieldBlock select option {
+            background-color: #faf9f8;
+        }
+
+        .twoOptionFormFieldBlock div.radiobuttons,
+        .twoOptionFormFieldBlock div.twooption_checkbox,
+        .optionSetFormFieldBlock div.radiobuttons,
+        .multiOptionSetFormFieldBlock fieldset {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 0px;
+            gap: 8px;
+            flex: 2;
+        }
+
+        .twoOptionFormFieldBlock div.radiobuttons,
+        .optionSetFormFieldBlock div.radiobuttons,
+        .multiOptionSetFormFieldBlock fieldset {
+            margin-top: 16px;
+        }
+
+        .twoOptionFormFieldBlock div.radiobuttons>div,
+        .twoOptionFormFieldBlock div.twooption_checkbox>div,
+        .optionSetFormFieldBlock div.radiobuttons>div,
+        .multiOptionSetFormFieldBlock fieldset>div,
+        .consentBlock>div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0px;
+            gap: 8px;
+        }
+
+        .twoOptionFormFieldBlock div.radiobuttons div label,
+        .optionSetFormFieldBlock div.radiobuttons div label {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        .twoOptionFormFieldBlock div.twooption_checkbox div label,
+        .twoOptionFormFieldBlock div.twooption_checkbox div label div,
+        .consentBlock div label p {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        .multiOptionSetFormFieldBlock fieldset>div>label {
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        .optionSetFormFieldBlock div.radiobuttons div input[type="radio"]:checked+label,
+        .twoOptionFormFieldBlock div.radiobuttons div input[type="radio"]:checked+label {}
+
+        .twoOptionFormFieldBlock div.twooption_checkbox div input[type="checkbox"]:checked+label,
+        .twoOptionFormFieldBlock div.twooption_checkbox div input[type="checkbox"]:checked+label div,
+        .consentBlock div input[type="checkbox"]:checked+label p {}
+
+        .twoOptionFormFieldBlock div.radiobuttons,
+        .optionSetFormFieldBlock div.radiobuttons {
+            padding: 0px;
+            margin: 0px;
+            border-radius: 0px;
+        }
+
+        .twoOptionFormFieldBlock div.twooption_checkbox>div,
+        .consentBlock>div {
+            width: 100%;
+            border-radius: 0px;
+        }
+
+        .twoOptionFormFieldBlock div.radiobuttons div,
+        .optionSetFormFieldBlock div.radiobuttons div {
+            width: 100%;
+        }
+
+        .twoOptionFormFieldBlock div.twooption_checkbox div,
+        .consentBlock div {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .twoOptionFormFieldBlock div.radiobuttons div input,
+        .twoOptionFormFieldBlock div.twooption_checkbox div input,
+        .optionSetFormFieldBlock div.radiobuttons div input,
+        .multiOptionSetFormFieldBlock fieldset>div>input[type="checkbox"],
+        .eventSession>div>input[type="checkbox"],
+        .consentBlock div input {
+            margin: 0px;
+            box-sizing: border-box;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #323130;
+            border-radius: 2px;
+            accent-color: #0078d4;
+            flex-shrink: 0;
+        }
+
+        .eventSessions {
+            font-size: 16px;
+            line-height: 1.2;
+            border: none
+        }
+
+        .eventSession label b {
+            display: inline
+        }
+
+        .eventSession>div>input[type="checkbox"] {
+            float: right;
+        }
+
+        .marketingForm [dir="rtl"],
+        .marketingForm [dir="rtl"] * {
+            text-align: right;
+        }
+
+        .marketingForm s span {
+            text-decoration: line-through;
+        }
+
+        .marketingForm u span {
+            text-decoration: underline;
+        }
+
+        .dividerWrapper p span {
+            line-height: 0px;
+        }
+
+        .marketingForm ul,
+        .marketingForm ol {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            line-height: 125%;
+            line-height: 1.25;
+            padding-inline-end: 0px !important;
+        }
+
+        .marketingForm p img {
+            max-width: 100%;
+        }
+
+        .marketingForm u a {
+            text-decoration: underline;
+        }
+
+        .marketingForm .imageWrapper a img {
+            text-decoration: none;
+            border: 0px;
+        }
+
+        .marketingForm th.columnContainer,
+        .marketingForm th.inner {
+            font-weight: normal;
+            text-align: left;
+        }
+
+        .marketingForm [dir="rtl"] th.columnContainer,
+        .marketingForm [dir="rtl"] th.inner {
+            font-weight: normal;
+            text-align: right;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .marketingForm a span {
+                line-height: inherit !important;
+            }
+
+            .marketingForm .multi table {
+                table-layout: fixed;
+                height: auto !important;
+            }
+
+            .marketingForm .multi td {
+                width: auto !important;
+                min-height: auto !important;
+            }
+
+            .marketingForm .multi tbody,
+            .marketingForm .multi tbody tr,
+            .marketingForm .multi tbody tr td,
+            .marketingForm .multi tbody tr th,
+            .marketingForm .outer tbody,
+            .marketingForm .outer tbody tr,
+            .marketingForm .outer tbody tr td,
+            .marketingForm .outer tbody tr th {
+                display: block;
+                box-sizing: border-box;
+                height: auto !important;
+                min-height: auto !important;
+            }
+
+            .marketingForm .wrap-section .multi tbody,
+            .marketingForm .wrap-section .multi tbody tr,
+            .marketingForm .wrap-section .multi tbody tr td,
+            .marketingForm .wrap-section .multi tbody tr th,
+            .marketingForm .wrap-section .outer tbody,
+            .marketingForm .wrap-section .outer tbody tr,
+            .marketingForm .wrap-section .outer tbody tr td,
+            .marketingForm .wrap-section .outer tbody tr th {
+                width: 100% !important;
+            }
+
+            .marketingForm .multi .inner {
+                height: auto !important;
+                min-height: auto !important;
+            }
+
+            .marketingForm .tbContainer .inner {
+                box-sizing: border-box;
+            }
+
+            .marketingForm .outer {
+                width: 100% !important;
+            }
+
+            .marketingForm .tbContainer .columnContainer table {
+                table-layout: fixed !important;
+            }
+
+            .marketingForm .innerTable {
+                min-height: auto !important;
+            }
+
+            .marketingForm .no-wrap-section .outer {
+                display: table !important;
+            }
+
+            .marketingForm .no-wrap-section .multi table {
+                height: 100% !important;
+            }
+
+            .marketingForm .no-wrap-section .multi tbody,
+            .marketingForm .no-wrap-section .outer tbody {
+                display: table-row-group !important;
+                width: 100% !important;
+            }
+
+            .marketingForm .no-wrap-section .multi tbody tr,
+            .marketingForm .no-wrap-section .outer tbody tr {
+                display: table-row !important;
+                width: 100% !important;
+            }
+
+            .marketingForm .no-wrap-section .multi tbody tr td,
+            .marketingForm .no-wrap-section .multi tbody tr th,
+            .marketingForm .no-wrap-section .outer tbody tr td,
+            .marketingForm .no-wrap-section .outer tbody tr th {
+                display: table-cell !important;
+            }
+
+            .marketingForm .no-wrap-section.columns-equal-class .outer tbody tr td,
+            .marketingForm .no-wrap-section.columns-equal-class .outer tbody tr th {
+                height: 0px !important;
+            }
+
+            .marketingForm .no-wrap-section .outer tbody tr td.inner,
+            .marketingForm .no-wrap-section .outer tbody tr th.inner {
+                width: 100% !important;
+                height: auto !important;
+            }
+
+            .marketingForm a[x-apple-data-detectors] {
+                color: inherit !important;
+                text-decoration: none !important;
+                font-size: inherit !important;
+                font-family: inherit !important;
+                font-weight: inherit !important;
+                line-height: inherit !important;
+            }
+        }
+
+        .notification-container {
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        .notification-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 38px;
+            border: 1.44737px solid#CCCCCC;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        .notification-message-hide {
+            display: none;
+        }
+
+        .phoneFormFieldBlock {
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        table.multi .phoneFormFieldBlock {
+            padding: 12px 20px;
+        }
+
+        .phoneFormFieldBlock label,
+        .phoneFormFieldBlock label * {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #323130;
+        }
+
+        .phoneFormFieldBlock label {
+            display: inline-block;
+            margin-top: 4px;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+            padding: 0px;
+            flex: 1;
+            width: 100%;
+        }
+
+        .phoneFormFieldBlock label>* {
+            display: inline-block;
+        }
+
+        .phoneFormFieldBlock label::after {
+            width: 22px;
+            display: inline-block;
+            line-height: 22px;
+            text-align: center;
+            color: #c33400;
+            content: "*";
+            visibility: hidden;
+        }
+
+        div[data-required].phoneFormFieldBlock label::after {
+            visibility: visible;
+        }
+
+        .phoneFormFieldBlock input::placeholder {}
+
+        .phoneFormFieldBlock .phoneCountryCode {
+            display: flex;
+            flex: 2 1 20%;
+            align-items: center;
+            flex-direction: row;
+            box-sizing: border-box;
+            border: 1px solid #e1dfdd;
+            border-radius: 2px;
+            justify-content: center;
+            background-color: transparent;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
+        .phoneFormFieldBlock .phoneCountryCodeLabel {
+            overflow: hidden;
+            margin: 0;
+            cursor: pointer;
+            padding-left: 5px;
+            padding-right: 5px;
+            opacity: 1;
+            text-align: center;
+            color: #605E5C;
+            background-color: #F3F2F1;
+            align-items: center;
+            align-self: stretch;
+            display: flex;
+        }
+
+        .phoneFormFieldBlock span[hidden] {
+            display: none;
+        }
+
+        .phoneFormFieldBlock input {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            padding: 6px 8px;
+            background-color: #faf9f8;
+            display: block;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+            flex: 2;
+            border: none;
+        }
+    </style>
+</head>
+
+<body><script>
+    document.addEventListener("d365mkt-afterformload", function() { 
+        const jsonData = {
+            "entries": [
+                {
+                    "id": "address1_freighttermscode-1727271468380-1", 
+                    "value": "1", 
+                    "label": "FOB",
+                    "data": [
+                        {"id": "address1_shippingmethodcode-1727271473641-2", "value": "2", "text": "DHL"},
+                        {"id": "address1_shippingmethodcode-1727271473641-3", "value": "3", "text": "FedEx"},
+                        {"id": "address1_shippingmethodcode-1727271473641-4", "value": "4", "text": "UPS"}
+                    ]
+                },
+                {
+                    "id": "address1_freighttermscode-1727271468380-2", 
+                    "value": "2", 
+                    "label": "free of charge", 
+                    "data":[
+                        {"id": "address1_shippingmethodcode-1727271473641-5", "value": "5", "text": "Postal Mail"},
+                        {"id": "address1_shippingmethodcode-1727271473641-6", "value": "6", "text": "Airborne"},
+                        {"id": "address1_shippingmethodcode-1727271473641-7", "value": "7", "text": "Whatever"}           
+                    ]
+                }
+            ]
+        };
+
+        const freightTermsSelect = document.getElementById('address1_freighttermscode-1727271468380');
+        freightTermsSelect.addEventListener("change", updateShippingMethods);
+        
+        const shippingMethodsSelect = document.getElementById('address1_shippingmethodcode-1727271473641');
+
+        // Populate the freight terms dropdown
+        jsonData.entries.forEach(entry => {
+            const option = document.createElement('option');
+            option.id = entry.id;
+            option.value = entry.value;
+            option.textContent = entry.label;
+            freightTermsSelect.appendChild(option);
+        });
+
+        // Update shipping methods based on selected freight term
+    function updateShippingMethods() {
+            // Clear previous options
+            shippingMethodsSelect.innerHTML = '<option value="">Select Shipping Method</option>';
+
+            const selectedFreightTerm = freightTermsSelect.value;
+            const selectedEntry = jsonData.entries.find(entry => entry.value === selectedFreightTerm);
+
+            if (selectedEntry) {
+                selectedEntry.data.forEach(method => {
+                    const option = document.createElement('option');
+                    option.id = method.id;
+                    option.value = method.value;
+                    option.textContent = method.text;
+                    shippingMethodsSelect.appendChild(option);
+                });
+            }
+        }
+});
+</script><main>
+        <form aria-label="Untitled Form" class="marketingForm">
+            <div data-layout="true" data-layout-version="v2" style="margin: auto; max-width: 600px;">
+                <div data-section="true" class="emptyContainer columns-equal-class wrap-section">
+                    <table class="outer" align="center" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 600px; display: block;">
+                        <tbody>
+                            <tr>
+                                <th style="padding: 88px 10px 0px">
+                                    <table style="width: 100%; border-collapse: collapse" class="containerWrapper tbContainer" cellpadding="0" cellspacing="0">
+                                        <tbody>
+                                            <tr>
+                                                <th data-container="true" class="columnContainer" data-container-width="100" style="vertical-align: top; min-width: 5px; width: 580px; height: 0px;" id="container13f3de4ff4f581669975165123">
+                                                    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; height: 100%;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <th class="inner" style="min-width: 5px; padding: 0px; vertical-align: top; word-wrap: break-word; word-break: break-word; margin-bottom: 32px; font-weight: normal;">
+                                                                    <div style="text-align: center">
+                                                                        <div class="drop-placeholder"></div><div data-editorblocktype="Text" style="margin: 10px">
+                                                                            <h1>Your Information</h1>
+                                                                        </div>
+                                                                        <div class="drop-placeholder"></div><div data-editorblocktype="Text" style="margin: 10px">
+                                                                            <p>Thanks for your interest. Please fill out
+                                                                                the form to be updated.</p>
+                                                                        </div><div class="drop-placeholder"></div>
+                                                                    </div>
+                                                                </th>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div data-section="true" class="emptyContainer columns-equal-class wrap-section">
+                    <table class="outer" align="center" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 600px; display: block;">
+                        <tbody>
+                            <tr>
+                                <th style="padding: 0px">
+                                    <table style="width: 100%; border-collapse: collapse" class="containerWrapper tbContainer" cellpadding="0" cellspacing="0">
+                                        <tbody>
+                                            <tr>
+                                                <th data-container="true" class="columnContainer" data-container-width="100" style="vertical-align: top; min-width: 5px; width: 600px; height: 0px; padding: 0px;" id="container2dc6e4991011c1669975289427">
+                                                    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; height: 100%;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <th class="inner" style="min-width: 5px; padding: 0px; vertical-align: top; word-wrap: break-word; word-break: break-word; word-wrap: break-word; word-break: break-word; background-color: rgba(0, 0, 0, 0); border-color: rgb(0, 0, 0); border-width: 0px; border-style: none; border-radius: 0px; font-weight: normal;">
+                                                                    <div class="drop-placeholder"></div><div class="textFormFieldBlock" data-editorblocktype="TextFormField" data-targetproperty="firstname" data-required="required">
+                                                                        <label title="First Name" for="firstname-1669975306869">What is your first name?</label><input id="firstname-1669975306869" type="text" name="firstname" placeholder="Enter your first name" title="First Name" maxlength="50" value="" required="required">
+                                                                    </div>
+                                                                    <div class="drop-placeholder"></div><div class="textFormFieldBlock" data-editorblocktype="TextFormField" data-targetproperty="lastname" data-required="required">
+                                                                        <label title="Last Name" for="lastname-1669976849422">What is your last name?</label><input id="lastname-1669976849422" type="text" name="lastname" placeholder="Enter your last name" title="Last Name" maxlength="50" required="required" value="">
+                                                                    </div>
+                                                                    <div class="drop-placeholder"></div><div class="textFormFieldBlock" data-editorblocktype="TextFormField" data-targetproperty="emailaddress1" data-required="required">
+                                                                        <label title="Email" for="emailaddress1-1669977007902">What is your email?</label><input id="emailaddress1-1669977007902" type="email" name="emailaddress1" placeholder="Enter your email address" title="Email" pattern="[^@\s\\&quot;<>\)\(\[\]:;,.]+(([.]{1}[^@\s\\&quot;<>\)\(\[\]:;,.]+)+?|)@([^@\s\\&quot;<>\)\(\[\]\+:;,\.\-]+(((\.|\+|-|--)[^@\s\\&quot;<>\)\(\[\]+:;,.\-]+)+?|)([.][^0-9@\s\\&quot;<>\)\(\[\]+:;,.\-]+)+?)" value="" required="required">
+                                                                    </div>
+                                                                    <div class="drop-placeholder"></div>
+                                                                    <div class="optionSetFormFieldBlock" data-editorblocktype="OptionSetFormField" data-targetproperty="address1_freighttermscode" data-prefill="false">
+                                                                        <label title="Address 1: Freight Terms" class="block-label" for="address1_freighttermscode-1727271468380">Address 1: Freight Terms</label>
+                                                                        <select id="address1_freighttermscode-1727271468380" name="address1_freighttermscode" title="Address 1: Freight Terms">
+                                                                            <option value="" hidden="">select an item...</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="drop-placeholder"></div><div class="optionSetFormFieldBlock" data-editorblocktype="OptionSetFormField" data-targetproperty="address1_shippingmethodcode" data-prefill="false">
+                                                                        <label title="Address 1: Shipping Method" class="block-label" for="address1_shippingmethodcode-1727271473641">Address 1: Shipping Method</label>
+                                                                        <select id="address1_shippingmethodcode-1727271473641" name="address1_shippingmethodcode" title="Address 1: Shipping Method">
+                                                                            <option value="" hidden="">select a freight term...</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div data-editorblocktype="SubmitButton" class="submitButtonWrapper">
+                                                                        <button class="submitButton" type="submit" aria-label="Submit"><span> Submit </span></button>
+                                                                    </div><div class="drop-placeholder"></div>
+                                                                </th>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div data-section="true" class="emptyContainer columns-equal-class wrap-section">
+                    <table class="outer" align="center" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 600px; display: block;">
+                        <tbody>
+                            <tr>
+                                <th style="padding: 0px 0px 24px">
+                                    <table style="width: 100%; border-collapse: collapse" class="containerWrapper tbContainer" cellpadding="0" cellspacing="0">
+                                        <tbody>
+                                            <tr>
+                                                <th data-container="true" class="columnContainer" data-container-width="100" style="vertical-align: top; min-width: 5px; width: 600px; height: 0px;" id="container3cd6ad67ebedc1669977093188">
+                                                    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; height: 100%;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <th class="inner" style="min-width: 5px; padding: 12px 10px; vertical-align: top; word-wrap: break-word; word-break: break-word; font-weight: normal;">
+                                                                    <div class="drop-placeholder"></div><div data-editorblocktype="Text" style="text-align: center">
+                                                                        <p> <span style="font-size: 10px; line-height: 14px; color: #605e5c"> © 2023. All rights reserved. </span>
+                                                                        </p>
+                                                                    </div><div class="drop-placeholder"></div>
+                                                                </th>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </main></body></html>
