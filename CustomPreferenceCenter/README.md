@@ -7,8 +7,7 @@ The intention of this article and the sample implementation was to demonstrate h
 - show all relevant contact points at once 
 - display a 3-state checkbox (opt-in, opt-out, no information)
 
-The following short demo video shows the details and how the custom preference center works. \
-![Demo Video](/CustomPreferenceCenter/assets/Custom%20Preference%20Center%20Demo%20final.mp4)
+The following short [Demo Video](/CustomPreferenceCenter/assets/CustomPreferenceCenterDemo_final.mp4) shows the details and how the custom preference center works. 
 
 The implemenation is divided into 3 parts: 
 - the UI in Power Pages
