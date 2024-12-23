@@ -1,0 +1,330 @@
+<div class="wrapper-body">
+    <!-- Sample code for Web API demonstration -->
+
+    <style>
+      #processingMsg {
+          width: 150px;
+          text-align: center;
+          padding: 6px 10px;
+          z-index: 9999;
+          top: 0;
+          left: 40%;
+          position: fixed;
+          -webkit-border-radius: 0 0 2px 2px;
+          border-radius: 0 0 2px 2px;
+          -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          display: none;
+      }
+    
+      table td[data-attribute] .glyphicon-pencil {
+          margin-left: 5px;
+          opacity: 0;
+      }
+    
+      table td[data-attribute]:hover .glyphicon-pencil {
+          opacity: 0.7;
+      }
+    
+      .framed-div {
+                border: 2px solid whitesmoke; /* Frame around the div */
+                padding: 20px; /* Space inside the frame */
+                /*width: 300px; /* Width of the div */
+                /*height: 200px; /* Height of the div */
+                margin: 50px auto; /* Center the div horizontally */
+                box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1); /* Optional shadow for a 3D effect */
+            }
+      .sub-entry {
+              margin-left: 20px; /* Indent for sub-entries */
+      }
+      .form-check-label {
+        margin-left: 10px;
+      }
+      #thankYouMessage {
+                display: none;
+            }
+    </style>
+    
+    <script>
+    
+    var compliancecenterID = "<< your compliance center ID >>";
+    var consentAPI = "<< Your URL to API Management>>";
+    var subscriptionID = "<< Your API Management Subscription ID >>";
+    
+    $(function() {
+      //Web API ajax wrapper
+      (function(webapi, $) {
+        function safeAjax(ajaxOptions) {
+          var deferredAjax = $.Deferred();
+          shell.getTokenDeferred().done(function(token) {
+            // Add headers for ajax
+            if (!ajaxOptions.headers) {
+              $.extend(ajaxOptions, {
+                headers: {
+                  "__RequestVerificationToken": token
+                }
+              });
+            } else {
+              ajaxOptions.headers["__RequestVerificationToken"] = token;
+            }
+            $.ajax(ajaxOptions)
+              .done(function(data, textStatus, jqXHR) {
+                validateLoginSession(data, textStatus, jqXHR, deferredAjax.resolve);
+              }).fail(deferredAjax.reject); //ajax
+          }).fail(function() {
+            deferredAjax.rejectWith(this, arguments); // On token failure pass the token ajax and args
+          });
+          return deferredAjax.promise();
+        }
+        webapi.safeAjax = safeAjax;
+      })(window.webapi = window.webapi || {}, jQuery)
+      // Notification component
+      var notificationMsg = (function() {
+        var $processingMsgEl = $('#processingMsg'),
+          _msg = 'Processing...',
+          _stack = 0,
+          _endTimeout;
+        return {
+          show: function(msg) {
+            $processingMsgEl.text(msg || _msg);
+            if (_stack === 0) {
+              clearTimeout(_endTimeout);
+              $processingMsgEl.show();
+            }
+            _stack++;
+          },
+          hide: function() {
+            _stack--;
+            if (_stack <= 0) {
+              _stack = 0;
+              clearTimeout(_endTimeout);
+              _endTimeout = setTimeout(function() {
+                $processingMsgEl.hide();
+              }, 500);
+            }
+          }
+        }
+      })();
+    
+      //Applicaton ajax wrapper 
+      function appAjax(processingMsg, ajaxOptions) {
+        notificationMsg.show(processingMsg);
+        return webapi.safeAjax(ajaxOptions)
+          .fail(function(response) {
+            if (response.responseJSON) {
+              alert("Error: " + response.responseJSON.error.message)
+            } else {
+              console.log(response);
+            }
+          }).always(notificationMsg.hide);
+      }
+     
+      function createCheckbox(topic, purpose, contact){
+        const checkbox = document.createElement('input');
+              checkbox.type = 'checkbox';
+              checkbox.id = (topic != null) ? topic.msdynmkt_topicid : purpose.msdynmkt_purposeid;
+              checkbox.name = (topic != null) ? topic.msdynmkt_topicname : purpose.msdynmkt_name;
+              checkbox.value = (topic != null) ? topic.msdynmkt_value : purpose.msdynmkt_value;
+              checkbox.className = 'form-check-input';
+              const v = (topic != null) ? topic.msdynmkt_value : purpose.msdynmkt_value; 
+              checkbox.checked = (v == 534120001) ? true: false; 
+              checkbox.wasChecked = checkbox.checked;
+              checkbox.cpcid = (topic != null) ? topic.msdynmkt_contactpointconsent4id : purpose.msdynmkt_contactpointconsent4id;
+              checkbox.indeterminate = (checkbox.cpcid == "") ? true : false;
+              checkbox.purposeid = purpose.msdynmkt_purposeid; 
+              checkbox.channelid = contact.msdynmkt_contactpointtype;
+              checkbox.contentpoint = contact.msdynmkt_contactpointvalue;
+              checkbox.consenttype = (topic != null) ? 534120001 : 534120000;
+    
+              return checkbox; 
+      }
+    
+      function createForm(jsonData) {
+      const outerDIV = document.createElement('div');
+    
+      jsonData.contactpoints.forEach(contact => {
+        const contactDiv = document.createElement('div');
+        contactDiv.innerHTML = `<h3>Contact Point: ${contact.msdynmkt_contactpointvalue}</h3>`;
+        contactDiv.className = 'framed-div';
+    
+        contact.purposes.forEach(purpose => {
+          const purposeDiv = document.createElement('div');
+          const checkbox = createCheckbox(null, purpose, contact); 
+          purposeDiv.className = 'form-check'; 
+          const label = document.createElement('label');
+              label.className = 'form-check-label';
+              label.htmlFor = purpose.msdynmkt_name;
+              label.appendChild(document.createTextNode(purpose.msdynmkt_name));
+    
+          purposeDiv.appendChild(checkbox);
+          purposeDiv.appendChild(label);
+    
+          //purposeDiv.innerHTML = `<h4>Purpose: ${purpose.msdynmkt_name}</h4>`;
+    
+          if (purpose.topics) {
+            purpose.topics.forEach(topic => {
+              const checkbox = createCheckbox(topic, purpose, contact); 
+              const label = document.createElement('label');
+              label.className = 'form-check-label';
+              label.htmlFor = topic.msdynmkt_topicid;
+              label.appendChild(document.createTextNode(topic.msdynmkt_topicname));
+    
+              const topicDiv = document.createElement('div'); 
+              topicDiv.className = 'form-check sub-entry'; 
+    
+              topicDiv.appendChild(checkbox);
+              topicDiv.appendChild(label);
+              //topicDiv.appendChild(document.createElement('br'));
+    
+              purposeDiv.appendChild(topicDiv); 
+            });
+            line = document.createElement('hr'); 
+            line.className = 'my-4'; 
+            purposeDiv.appendChild(line);
+          }
+    
+          contactDiv.appendChild(purposeDiv);
+        });
+    
+        outerDIV.appendChild(contactDiv);
+    
+    
+      });
+        //<button type="submit" class="btn btn-primary" id="submitChanges">Submit</button>
+        const btnsubmit = document.createElement('button');
+        btnsubmit.type = 'submit';
+        btnsubmit.className = 'btn btn-primary';
+        btnsubmit.id = 'submitChanges';
+        btnsubmit.innerHTML = 'Save Changes';
+        outerDIV.appendChild(btnsubmit);
+      //document.body.appendChild(form);
+      document.getElementById("consentTable").appendChild(outerDIV);
+    }
+    
+      function setupForm(){
+        
+        const form = document.getElementById("consentform");
+        const changedValues = [];
+        const counter = 0; 
+    
+        form.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const elements = form.elements;
+    
+          for (let element of elements) {
+              if (element.type !== 'submit' && element.checked !== element.wasChecked) {
+                  let consentobject = {
+                    recordid: element.cpcid,
+                    topicid: element.id,
+                    purposeid: element.purposeid,
+                    value: (element.checked) ? 534120001 : 534120002, 
+                    channelid: element.channelid,
+                    contactpoint: element.contentpoint,
+                    consenttype: element.consenttype
+                    //name: element.name
+                  };
+                  changedValues.push(consentobject); 
+              }
+        }
+    
+        console.log('Changed values:', changedValues);
+
+        // Submit changedValues via AJAX or other methods
+        updateConsent(changedValues);
+        });
+    
+      }
+    
+      function updateConsent(consentdata) {
+    
+        const updateURL = consentAPI + "update-cpc?subscription-key=" + subscriptionID;
+        appAjax("updating consent", {
+          type: "POST", 
+          url: updateURL,
+          contentType: "application/json",
+          headers : {        
+            "Access-Control-Allow-Origin": "*"
+          },
+          data: JSON.stringify(consentdata),
+          //data: '[' + JSON.stringify(consentdata) + ']',
+          dataType: 'json',
+          success: function(res, status, xhr){
+            console.log("successfully updated");
+            return res; 
+          }
+        });
+        document.getElementById('consentTable').style.display = 'none'; // Hide the form
+        document.getElementById('thankYouMessage').style.display = 'block'; 
+        };
+    
+      function loadConsentData() {
+    
+        const contactid = "{{user.id}}";
+        const loadconsentURL = consentAPI + "contacts/" + contactid + "/complianceprofile/" + compliancecenterID + "?subscription-key=" + subscriptionID;
+        console.log("loadconsenturl: " + loadconsentURL);
+        appAjax("Fetching consent information...", {
+          
+          type: "GET",
+          url: loadconsentURL,
+          contentType: "application/json", 
+          headers : {        
+            "Access-Control-Allow-Origin": "*"
+          },
+          success: function(res, status, xhr){
+    
+            var contactheader = JSON.parse(JSON.stringify(res)); 
+            console.log(contactheader);
+            createForm(res); 
+            setupForm();
+            return res; 
+          }
+        });
+        return false;
+      };
+    
+      var consentdata = loadConsentData();
+    });
+    
+    </script>
+    
+    <style>
+      .indeterminate {
+          background-color: lightgray;
+      }
+    </style>
+    
+    <div id="processingMsg" class="alert alert-warning" role="alert"></div>
+    <div id="dataTable"></div>
+    
+    <div class="wrapper-body">
+      <div class="container">
+          <div class="page-heading">
+              {% block breadcrumbs %}
+              {% include 'Breadcrumbs' %}
+              {% endblock %}
+              {% block title %}
+              {% include 'Page Header' %}
+              {% endblock %}
+          </div>
+    
+      </div>
+      <div id="mainContent">
+      {% block main %}
+    
+        <form id="consentform">
+    
+          <div class="jumbotron" id="consentTable">
+
+        </div>   
+    
+          <div id="thankYouMessage">
+            <h2>Thank you!</h2>
+        </div>
+    
+        </form>
+    
+      {% endblock %}
+    
+    </div>  
+    
+    

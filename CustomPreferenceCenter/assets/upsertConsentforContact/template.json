@@ -1,0 +1,278 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_upsertconsentforcontact_name": {
+            "defaultValue": "upsertconsentforcontact",
+            "type": "String"
+        },
+        "connections_commondataservice_2_externalid": {
+            "defaultValue": "/subscriptions/<< your subscription ID >>/resourceGroups/<< your resource group >>/providers/Microsoft.Web/connections/commondataservice-2",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_upsertconsentforcontact_name')]",
+            "location": "northeurope",
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "manual": {
+                            "type": "Request",
+                            "kind": "Http",
+                            "inputs": {
+                                "method": "POST",
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "headers": {
+                                            "type": "object",
+                                            "properties": {
+                                                "Content-Type": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "queries": {
+                                            "type": "object",
+                                            "properties": {
+                                                "subscription-key": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "body": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "additionalProperties": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "recordid": {
+                                                                "type": "string"
+                                                            },
+                                                            "topicid": {
+                                                                "type": "string"
+                                                            },
+                                                            "purposeid": {
+                                                                "type": "string"
+                                                            },
+                                                            "value": {
+                                                                "type": "integer"
+                                                            },
+                                                            "channelid": {
+                                                                "type": "integer"
+                                                            },
+                                                            "consenttype": {
+                                                                "type": "integer"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Response": {
+                            "runAfter": {
+                                "For_each": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Response",
+                            "kind": "Http",
+                            "inputs": {
+                                "statusCode": 200
+                            }
+                        },
+                        "Parse_JSON": {
+                            "runAfter": {},
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@triggerBody()",
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "recordid": {
+                                                        "type": "string"
+                                                    },
+                                                    "topicid": {
+                                                        "type": "string"
+                                                    },
+                                                    "purposeid": {
+                                                        "type": "string"
+                                                    },
+                                                    "value": {
+                                                        "type": "integer"
+                                                    },
+                                                    "channelid": {
+                                                        "type": "integer"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "For_each": {
+                            "foreach": "@body('Parse_JSON')",
+                            "actions": {
+                                "new_or_existing_CPC": {
+                                    "actions": {
+                                        "Topic_or_Purpose": {
+                                            "actions": {
+                                                "Add_Purpose_CPC": {
+                                                    "type": "ApiConnection",
+                                                    "inputs": {
+                                                        "host": {
+                                                            "connection": {
+                                                                "name": "@parameters('$connections')['commondataservice']['connectionId']"
+                                                            }
+                                                        },
+                                                        "method": "post",
+                                                        "body": {
+                                                            "msdynmkt_contactpointtype": "@items('For_each')['channelid']",
+                                                            "msdynmkt_value": "@items('For_each')['value']",
+                                                            "msdynmkt_contactpointvalue": "@items('For_each')['contactpoint']",
+                                                            "msdynmkt_purposeId@odata.bind": "msdynmkt_purposes(@{items('For_each')['purposeid']})",
+                                                            "msdynmkt_logicalreason": 534120001,
+                                                            "msdynmkt_source": 534120000,
+                                                            "msdynmkt_contactpointconsenttype": "@items('For_each')['consenttype']"
+                                                        },
+                                                        "headers": {
+                                                            "prefer": "return=representation,odata.include-annotations=*",
+                                                            "organization": "<< your CI-J ORG >>"
+                                                        },
+                                                        "path": "/api/data/v9.1/@{encodeURIComponent(encodeURIComponent('msdynmkt_contactpointconsent4s'))}"
+                                                    }
+                                                }
+                                            },
+                                            "else": {
+                                                "actions": {
+                                                    "Add_Topic_CPC": {
+                                                        "type": "ApiConnection",
+                                                        "inputs": {
+                                                            "host": {
+                                                                "connection": {
+                                                                    "name": "@parameters('$connections')['commondataservice']['connectionId']"
+                                                                }
+                                                            },
+                                                            "method": "post",
+                                                            "body": {
+                                                                "msdynmkt_contactpointtype": "@items('For_each')['channelid']",
+                                                                "msdynmkt_value": "@items('For_each')['value']",
+                                                                "msdynmkt_contactpointvalue": "@items('For_each')['contactpoint']",
+                                                                "msdynmkt_purposeId@odata.bind": "msdynmkt_purposes(@{items('For_each')['purposeid']})",
+                                                                "msdynmkt_logicalreason": 534120001,
+                                                                "msdynmkt_source": 534120000,
+                                                                "msdynmkt_contactpointconsenttype": "@items('For_each')['consenttype']",
+                                                                "msdynmkt_topicId@odata.bind": "msdynmkt_topics(@{items('For_each')['topicid']})"
+                                                            },
+                                                            "headers": {
+                                                                "prefer": "return=representation,odata.include-annotations=*",
+                                                                "organization": "<< your CI-J ORG >>"
+                                                            },
+                                                            "path": "/api/data/v9.1/@{encodeURIComponent(encodeURIComponent('msdynmkt_contactpointconsent4s'))}"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "expression": {
+                                                "and": [
+                                                    {
+                                                        "equals": [
+                                                            "@items('For_each')['consenttype']",
+                                                            534120000
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "type": "If"
+                                        }
+                                    },
+                                    "else": {
+                                        "actions": {
+                                            "Update_a_row": {
+                                                "type": "ApiConnection",
+                                                "inputs": {
+                                                    "host": {
+                                                        "connection": {
+                                                            "name": "@parameters('$connections')['commondataservice']['connectionId']"
+                                                        }
+                                                    },
+                                                    "method": "patch",
+                                                    "body": {
+                                                        "msdynmkt_value": "@items('For_each')?['value']"
+                                                    },
+                                                    "headers": {
+                                                        "prefer": "return=representation,odata.include-annotations=*",
+                                                        "accept": "application/json;odata.metadata=full",
+                                                        "organization": "<< your CI-J ORG >>"
+                                                    },
+                                                    "path": "/api/data/v9.1/@{encodeURIComponent(encodeURIComponent('msdynmkt_contactpointconsent4s'))}(@{encodeURIComponent(encodeURIComponent(items('For_each')?['recordid']))})"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "expression": {
+                                        "and": [
+                                            {
+                                                "equals": [
+                                                    "@items('For_each')['recordid']",
+                                                    ""
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "type": "If"
+                                }
+                            },
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "commondataservice": {
+                                "id": "/subscriptions/bee963f2-566d-4ce3-a3ef-0fb65afa0365/providers/Microsoft.Web/locations/northeurope/managedApis/commondataservice",
+                                "connectionId": "[parameters('connections_commondataservice_2_externalid')]",
+                                "connectionName": "commondataservice-2"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
