@@ -1,0 +1,803 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_getconsentbycontactV3_name": {
+            "defaultValue": "getconsentbycontactV3",
+            "type": "String"
+        },
+        "integrationAccounts_cijintegrationaccount_externalid": {
+            "defaultValue": "/subscriptions/<<your subscription ID>>/resourceGroups/<< your resource group >>/providers/Microsoft.Logic/integrationAccounts/cijintegrationaccount",
+            "type": "String"
+        },
+        "connections_commondataservice_2_externalid": {
+            "defaultValue": "/subscriptions/<<your subscription ID>>/resourceGroups/<< your resource group >>/providers/Microsoft.Web/connections/commondataservice-2",
+            "type": "String"
+        },
+        "connections_commondataservice_1_externalid": {
+            "defaultValue": "/subscriptions/<<your subscription ID>>/resourceGroups/<< your resource group >>/providers/Microsoft.Web/connections/commondataservice-1",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_getconsentbycontactV3_name')]",
+            "location": "northeurope",
+            "properties": {
+                "state": "Enabled",
+                "integrationAccount": {
+                    "id": "[parameters('integrationAccounts_cijintegrationaccount_externalid')]"
+                },
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "manual": {
+                            "correlation": {},
+                            "type": "Request",
+                            "kind": "Http",
+                            "inputs": {
+                                "method": "GET",
+                                "relativePath": "/contacts/{contactid}/complianceprofile/{profileid}"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Compose_complete_response": {
+                            "runAfter": {
+                                "compose_Contact_Points_Array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": {
+                                "contactid": "@triggerOutputs()['relativePathParameters']['contactid']",
+                                "complianceprofileid": "@triggerOutputs()?['relativePathParameters']?['profileid']",
+                                "contactpoints": "@variables('Contactpoints_array')"
+                            }
+                        },
+                        "Response": {
+                            "runAfter": {
+                                "Compose_complete_response": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Response",
+                            "kind": "Http",
+                            "inputs": {
+                                "statusCode": 200,
+                                "body": "@outputs('Compose_complete_response')"
+                            }
+                        },
+                        "Read_contact": {
+                            "runAfter": {},
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['commondataservice']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "headers": {
+                                    "prefer": "odata.include-annotations=*",
+                                    "accept": "application/json;odata.metadata=full",
+                                    "organization": "<< your CI-J ORG >>"
+                                },
+                                "path": "/api/data/v9.1/@{encodeURIComponent('contacts')}(@{encodeURIComponent(triggerOutputs()['relativePathParameters']['contactid'])})",
+                                "queries": {
+                                    "$select": "emailaddress1, mobilephone"
+                                }
+                            }
+                        },
+                        "Initialize_contactpoints": {
+                            "runAfter": {
+                                "Read_Topics_for_commercial_Purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "contactpoints",
+                                        "type": "array"
+                                    }
+                                ]
+                            }
+                        },
+                        "Compose_contactpoints": {
+                            "runAfter": {
+                                "Initialize_contactpoints": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": {
+                                "contactpoints": [
+                                    {
+                                        "msdynmkt_contactpointvalue": "@body('Read_contact')?['emailaddress1']",
+                                        "msdynmkt_contactpointtype": 534120000
+                                    },
+                                    {
+                                        "msdynmkt_contactpointvalue": "@body('Read_contact')?['mobilephone']",
+                                        "msdynmkt_contactpointtype": 534120001
+                                    }
+                                ]
+                            }
+                        },
+                        "compose_Contact_Points_Array": {
+                            "runAfter": {
+                                "Compose_Phone_contact_point": [
+                                    "Succeeded"
+                                ],
+                                "Compose_Email_contact_point": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Contactpoints_array",
+                                        "type": "array",
+                                        "value": [
+                                            "@outputs('Compose_Email_contact_point')",
+                                            "@outputs('Compose_Phone_contact_point')"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "compose_phone_Purpose_array": {
+                            "runAfter": {
+                                "Compose_phone_commercial_purpose": [
+                                    "Succeeded"
+                                ],
+                                "Compose_phone_tracking_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "purposes_phone",
+                                        "type": "array",
+                                        "value": [
+                                            "@outputs('Compose_phone_commercial_purpose')",
+                                            "@outputs('Compose_phone_tracking_purpose')"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "Compose_Email_contact_point": {
+                            "runAfter": {
+                                "compose_email_Purpose_array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": {
+                                "msdynmkt_contactpointvalue": "@{outputs('Compose_contactpoints')['contactpoints'][0]?['msdynmkt_contactpointvalue']}",
+                                "msdynmkt_contactpointtype": "@{outputs('Compose_contactpoints')['contactpoints'][0]?['msdynmkt_contactpointtype']}",
+                                "purposes": "@variables('purposes_email')"
+                            }
+                        },
+                        "Read_all_Contact_Point_Consents": {
+                            "runAfter": {
+                                "Read_contact": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['commondataservice-1']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "headers": {
+                                    "prefer": "odata.include-annotations=*",
+                                    "accept": "application/json;odata.metadata=full",
+                                    "organization": "<< your CI-J ORG >>"
+                                },
+                                "path": "/api/data/v9.1/msdynmkt_contactpointconsent4s",
+                                "queries": {
+                                    "$select": "msdynmkt_contactpointvalue, msdynmkt_contactpointconsenttype, msdynmkt_value, msdynmkt_contactpointtype, _msdynmkt_purposeid_value, _msdynmkt_topicid_value",
+                                    "$filter": "msdynmkt_contactpointvalue eq '@{body('Read_contact')?['emailaddress1']}' or msdynmkt_contactpointvalue eq '@{body('Read_contact')?['mobilephone']}'"
+                                }
+                            }
+                        },
+                        "cpc_array": {
+                            "runAfter": {
+                                "Read_all_Contact_Point_Consents": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "cpc_array",
+                                        "type": "array",
+                                        "value": "@body('Read_all_Contact_Point_Consents')?['value']"
+                                    }
+                                ]
+                            }
+                        },
+                        "Parse_cpc_array": {
+                            "runAfter": {
+                                "cpc_array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@variables('cpc_array')",
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "@@odata.type": {},
+                                            "@@odata.id": {},
+                                            "@@odata.etag": {},
+                                            "@@odata.editLink": {},
+                                            "msdynmkt_contactpointvalue": {},
+                                            "msdynmkt_contactpointconsenttype@OData.Community.Display.V1.FormattedValue": {},
+                                            "msdynmkt_contactpointconsenttype": {},
+                                            "msdynmkt_value@OData.Community.Display.V1.FormattedValue": {},
+                                            "msdynmkt_value": {},
+                                            "msdynmkt_contactpointtype@OData.Community.Display.V1.FormattedValue": {},
+                                            "msdynmkt_contactpointtype": {},
+                                            "_msdynmkt_purposeid_value@OData.Community.Display.V1.FormattedValue": {},
+                                            "_msdynmkt_purposeid_value@Microsoft.Dynamics.CRM.associatednavigationproperty": {},
+                                            "_msdynmkt_purposeid_value@Microsoft.Dynamics.CRM.lookuplogicalname": {},
+                                            "_msdynmkt_purposeid_value@odata.type": {},
+                                            "_msdynmkt_purposeid_value": {},
+                                            "_msdynmkt_topicid_value@OData.Community.Display.V1.FormattedValue": {},
+                                            "_msdynmkt_topicid_value@Microsoft.Dynamics.CRM.associatednavigationproperty": {},
+                                            "_msdynmkt_topicid_value@Microsoft.Dynamics.CRM.lookuplogicalname": {},
+                                            "_msdynmkt_topicid_value@odata.type": {},
+                                            "_msdynmkt_topicid_value": {},
+                                            "msdynmkt_contactpointconsent4id@odata.type": {},
+                                            "msdynmkt_contactpointconsent4id": {},
+                                            "msdynmkt_purposeId@odata.associationLink": {},
+                                            "msdynmkt_purposeId@odata.navigationLink": {},
+                                            "msdynmkt_topicId@odata.associationLink": {},
+                                            "msdynmkt_topicId@odata.navigationLink": {}
+                                        },
+                                        "required": [
+                                            "@@odata.type",
+                                            "@@odata.id",
+                                            "@@odata.etag",
+                                            "@@odata.editLink",
+                                            "msdynmkt_contactpointvalue",
+                                            "msdynmkt_contactpointconsenttype@OData.Community.Display.V1.FormattedValue",
+                                            "msdynmkt_contactpointconsenttype",
+                                            "msdynmkt_value@OData.Community.Display.V1.FormattedValue",
+                                            "msdynmkt_value",
+                                            "msdynmkt_contactpointtype@OData.Community.Display.V1.FormattedValue",
+                                            "msdynmkt_contactpointtype",
+                                            "_msdynmkt_purposeid_value@OData.Community.Display.V1.FormattedValue",
+                                            "_msdynmkt_purposeid_value@Microsoft.Dynamics.CRM.associatednavigationproperty",
+                                            "_msdynmkt_purposeid_value@Microsoft.Dynamics.CRM.lookuplogicalname",
+                                            "_msdynmkt_purposeid_value@odata.type",
+                                            "_msdynmkt_purposeid_value",
+                                            "_msdynmkt_topicid_value",
+                                            "msdynmkt_contactpointconsent4id@odata.type",
+                                            "msdynmkt_contactpointconsent4id",
+                                            "msdynmkt_purposeId@odata.associationLink",
+                                            "msdynmkt_purposeId@odata.navigationLink",
+                                            "msdynmkt_topicId@odata.associationLink",
+                                            "msdynmkt_topicId@odata.navigationLink"
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "Read_Purposes_for_Profile": {
+                            "runAfter": {
+                                "Parse_cpc_array": [
+                                    "Succeeded"
+                                ],
+                                "Compose_contactpoints": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['commondataservice']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "headers": {
+                                    "prefer": "odata.include-annotations=*",
+                                    "accept": "application/json;odata.metadata=full",
+                                    "organization": "@{'<< your CI-J ORG >>'}"
+                                },
+                                "path": "/api/data/v9.1/@{encodeURIComponent('msdynmkt_purposes')}",
+                                "queries": {
+                                    "$select": "msdynmkt_purposeid, msdynmkt_name, msdynmkt_type",
+                                    "$filter": "msdynmkt_msdynmkt_purpose_msdynmkt_compliancev4/any(t:t/msdynmkt_compliancesettings4id eq '@{triggerOutputs()?['relativePathParameters']?['profileid']}')",
+                                    "$orderby": "msdynmkt_name"
+                                }
+                            }
+                        },
+                        "select_phone_tracking_purpose": {
+                            "runAfter": {
+                                "Initialize_Contactpoint_Phone": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Query",
+                            "inputs": {
+                                "from": "@body('Read_Purposes_for_Profile')?['value']",
+                                "where": "@equals(item()?['msdynmkt_type'],534120002)"
+                            }
+                        },
+                        "Compose_phone_tracking_purpose": {
+                            "runAfter": {
+                                "check_phone_cpc_for_tracking_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": {
+                                "msdynmkt_purposeid": "@{body('select_phone_tracking_purpose')[0]?['msdynmkt_purposeid']}",
+                                "msdynmkt_name": "@{body('select_phone_tracking_purpose')[0]?['msdynmkt_name']}",
+                                "msdynmkt_type": "@body('select_phone_tracking_purpose')[0]?['msdynmkt_type']",
+                                "msdynmkt_contactpointconsent4id": "@if(empty(body('check_phone_cpc_for_tracking_purpose')),'',body('check_phone_cpc_for_tracking_purpose')?['msdynmkt_contactpointconsent4id'])\n\n",
+                                "msdynmkt_value": "@if(empty(body('check_phone_cpc_for_tracking_purpose')),'',body('check_phone_cpc_for_tracking_purpose')?['msdynmkt_value'])"
+                            }
+                        },
+                        "Initialize_phone_Topics_array": {
+                            "runAfter": {
+                                "Initialize_Contactpoint_Phone": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "topics_phone",
+                                        "type": "array"
+                                    }
+                                ]
+                            }
+                        },
+                        "For_each_phone_topic": {
+                            "foreach": "@body('Read_Topics_for_commercial_Purpose')?['value']",
+                            "actions": {
+                                "Parse_topic_JSON": {
+                                    "type": "ParseJson",
+                                    "inputs": {
+                                        "content": "@items('For_each_phone_topic')",
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "@@odata.type": {
+                                                    "type": "string"
+                                                },
+                                                "@@odata.id": {
+                                                    "type": "string"
+                                                },
+                                                "@@odata.etag": {
+                                                    "type": "string"
+                                                },
+                                                "@@odata.editLink": {
+                                                    "type": "string"
+                                                },
+                                                "msdynmkt_topicid@odata.type": {
+                                                    "type": "string"
+                                                },
+                                                "msdynmkt_topicid": {
+                                                    "type": "string"
+                                                },
+                                                "msdynmkt_name": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "Compose_Topic_entry": {
+                                    "runAfter": {
+                                        "check_phone_cpc_for_topic": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "Compose",
+                                    "inputs": {
+                                        "msdynmkt_contactpointconsent4id": "@if(empty(body('check_phone_cpc_for_topic')),'',body('check_phone_cpc_for_topic')?['msdynmkt_contactpointconsent4id'])",
+                                        "msdynmkt_value": "@if(empty(body('check_phone_cpc_for_topic')),'',body('check_phone_cpc_for_topic')?['msdynmkt_value'])",
+                                        "msdynmkt_topicid": "@body('Parse_topic_JSON')?['msdynmkt_topicid']",
+                                        "msdynmkt_topicname": "@body('Parse_topic_JSON')?['msdynmkt_name']"
+                                    }
+                                },
+                                "Append_to_phone_topic_array": {
+                                    "runAfter": {
+                                        "Compose_Topic_entry": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "AppendToArrayVariable",
+                                    "inputs": {
+                                        "name": "topics_phone",
+                                        "value": "@outputs('Compose_Topic_entry')"
+                                    }
+                                },
+                                "check_phone_cpc_for_topic": {
+                                    "runAfter": {
+                                        "Parse_topic_JSON": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "JavaScriptCode",
+                                    "inputs": {
+                                        "code": "var cpc = workflowContext.actions.Parse_cpc_array.outputs.body;\r\n\r\nresult = \"\";\r\n\r\ncpc.forEach(item=>{\r\n  if((item._msdynmkt_topicid_value == workflowContext.actions.parse_topic_json.outputs.body.msdynmkt_topicid) && (item.msdynmkt_contactpointtype == \"534120001\"))\r\n    result =  item;\r\n});\r\nreturn result;"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_phone_Topics_array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        },
+                        "select_phone_commercial_purpose": {
+                            "runAfter": {
+                                "For_each_phone_topic": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Query",
+                            "inputs": {
+                                "from": "@body('Read_Purposes_for_Profile')?['value']",
+                                "where": "@equals(item()?['msdynmkt_type'],534120000)"
+                            }
+                        },
+                        "Compose_phone_commercial_purpose": {
+                            "runAfter": {
+                                "check_phone_cpc_for_commercial_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": {
+                                "msdynmkt_purposeid": "@{body('select_phone_commercial_purpose')[0]?['msdynmkt_purposeid']}",
+                                "msdynmkt_name": "@{body('select_phone_commercial_purpose')[0]?['msdynmkt_name']}",
+                                "msdynmkt_type": "@body('select_phone_commercial_purpose')[0]?['msdynmkt_type']",
+                                "msdynmkt_contactpointconsent4id": "@if(empty(body('check_phone_cpc_for_commercial_purpose')),'',body('check_phone_cpc_for_commercial_purpose')?['msdynmkt_contactpointconsent4id'])",
+                                "msdynmkt_value": "@if(empty(body('check_phone_cpc_for_commercial_purpose')),'',body('check_phone_cpc_for_commercial_purpose')?['msdynmkt_value'])",
+                                "topics": "@variables('topics_phone')"
+                            }
+                        },
+                        "check_phone_cpc_for_tracking_purpose": {
+                            "runAfter": {
+                                "select_phone_tracking_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "JavaScriptCode",
+                            "inputs": {
+                                "code": "var cpc = workflowContext.actions.Parse_cpc_array.outputs.body;\r\n\r\nresult = \"\";\r\n\r\ncpc.forEach(item=>{\r\n  if((item._msdynmkt_purposeid_value == workflowContext.actions.select_phone_tracking_purpose.outputs.body[0].msdynmkt_purposeid) && (item.msdynmkt_contactpointtype == \"534120001\"))\r\n    result =  item;\r\n});\r\nreturn result;"
+                            }
+                        },
+                        "Initialize_Contactpoint_Email": {
+                            "runAfter": {
+                                "Read_Purposes_for_Profile": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Contactpoint Email",
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_Contactpoint_Phone": {
+                            "runAfter": {
+                                "Read_Purposes_for_Profile": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Contactpoint Phone",
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        },
+                        "Read_Topics_for_commercial_Purpose": {
+                            "runAfter": {
+                                "Read_contact": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['commondataservice']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "headers": {
+                                    "prefer": "odata.include-annotations=*",
+                                    "accept": "application/json;odata.metadata=full",
+                                    "organization": "@{'<< your CI-J ORG >>'}"
+                                },
+                                "path": "/api/data/v9.1/@{encodeURIComponent(encodeURIComponent('msdynmkt_topics'))}",
+                                "queries": {
+                                    "$select": "msdynmkt_topicid, msdynmkt_name",
+                                    "$filter": "msdynmkt_purposeId/msdynmkt_uionlycomplianceprofilelookup/msdynmkt_compliancesettings4id eq '@{triggerOutputs()?['relativePathParameters']?['profileid']}' and msdynmkt_purposeId/msdynmkt_type eq 534120000"
+                                }
+                            }
+                        },
+                        "check_phone_cpc_for_commercial_purpose": {
+                            "runAfter": {
+                                "select_phone_commercial_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "JavaScriptCode",
+                            "inputs": {
+                                "code": "var cpc = workflowContext.actions.Parse_cpc_array.outputs.body;\r\n\r\nresult = \"\";\r\n\r\ncpc.forEach(item=>{\r\n  if((item._msdynmkt_purposeid_value == workflowContext.actions.select_phone_commercial_purpose.outputs.body[0].msdynmkt_purposeid) && (item.msdynmkt_contactpointtype == \"534120001\"))\r\n    result =  item;\r\n});\r\nreturn result;"
+                            }
+                        },
+                        "select_email_tracking_purpose": {
+                            "runAfter": {
+                                "Initialize_Contactpoint_Email": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Query",
+                            "inputs": {
+                                "from": "@body('Read_Purposes_for_Profile')?['value']",
+                                "where": "@equals(item()?['msdynmkt_type'],534120002)"
+                            }
+                        },
+                        "check_email_cpc_for_tracking_purpose": {
+                            "runAfter": {
+                                "select_email_tracking_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "JavaScriptCode",
+                            "inputs": {
+                                "code": "var cpc = workflowContext.actions.Parse_cpc_array.outputs.body;\r\n\r\nresult = \"\";\r\n\r\ncpc.forEach(item=>{\r\n  if((item._msdynmkt_purposeid_value == workflowContext.actions.select_email_tracking_purpose.outputs.body[0].msdynmkt_purposeid) && (item.msdynmkt_contactpointtype == \"534120000\"))\r\n    result =  item;\r\n});\r\nreturn result;"
+                            }
+                        },
+                        "Initialize_email_Topics_array": {
+                            "runAfter": {
+                                "Initialize_Contactpoint_Email": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "topics_email",
+                                        "type": "array"
+                                    }
+                                ]
+                            }
+                        },
+                        "Compose_email_tracking_purpose": {
+                            "runAfter": {
+                                "check_email_cpc_for_tracking_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": {
+                                "msdynmkt_purposeid": "@{body('select_email_tracking_purpose')[0]?['msdynmkt_purposeid']}",
+                                "msdynmkt_name": "@{body('select_email_tracking_purpose')[0]?['msdynmkt_name']}",
+                                "msdynmkt_type": "@body('select_email_tracking_purpose')[0]?['msdynmkt_type']",
+                                "msdynmkt_contactpointconsent4id": "@if(empty(body('check_email_cpc_for_tracking_purpose')),'',body('check_email_cpc_for_tracking_purpose')?['msdynmkt_contactpointconsent4id'])\n\n",
+                                "msdynmkt_value": "@if(empty(body('check_email_cpc_for_tracking_purpose')),'',body('check_email_cpc_for_tracking_purpose')?['msdynmkt_value'])"
+                            }
+                        },
+                        "Compose_Phone_contact_point": {
+                            "runAfter": {
+                                "compose_phone_Purpose_array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": {
+                                "msdynmkt_contactpointvalue": "@{outputs('Compose_contactpoints')['contactpoints'][1]?['msdynmkt_contactpointvalue']}",
+                                "msdynmkt_contactpointtype": "@{outputs('Compose_contactpoints')['contactpoints'][1]?['msdynmkt_contactpointtype']}",
+                                "purposes": "@variables('purposes_phone')"
+                            }
+                        },
+                        "compose_email_Purpose_array": {
+                            "runAfter": {
+                                "Compose_email_tracking_purpose": [
+                                    "Succeeded"
+                                ],
+                                "Compose_email_commercial_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "purposes_email",
+                                        "type": "array",
+                                        "value": [
+                                            "@outputs('Compose_email_commercial_purpose')",
+                                            "@outputs('Compose_email_tracking_purpose')"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "For_each_email_topic": {
+                            "foreach": "@body('Read_Topics_for_commercial_Purpose')?['value']",
+                            "actions": {
+                                "Parse_email_topic_JSON": {
+                                    "type": "ParseJson",
+                                    "inputs": {
+                                        "content": "@items('For_each_email_topic')",
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "@@odata.type": {
+                                                    "type": "string"
+                                                },
+                                                "@@odata.id": {
+                                                    "type": "string"
+                                                },
+                                                "@@odata.etag": {
+                                                    "type": "string"
+                                                },
+                                                "@@odata.editLink": {
+                                                    "type": "string"
+                                                },
+                                                "msdynmkt_topicid@odata.type": {
+                                                    "type": "string"
+                                                },
+                                                "msdynmkt_topicid": {
+                                                    "type": "string"
+                                                },
+                                                "msdynmkt_name": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "Compose_email_Topic_entry": {
+                                    "runAfter": {
+                                        "check_email_cpc_for_topic_": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "Compose",
+                                    "inputs": {
+                                        "msdynmkt_contactpointconsent4id": "@if(empty(body('check_email_cpc_for_topic_')),'',body('check_email_cpc_for_topic_')?['msdynmkt_contactpointconsent4id'])",
+                                        "msdynmkt_value": "@if(empty(body('check_email_cpc_for_topic_')),'',body('check_email_cpc_for_topic_')?['msdynmkt_value'])",
+                                        "msdynmkt_topicid": "@body('Parse_email_topic_JSON')?['msdynmkt_topicid']",
+                                        "msdynmkt_topicname": "@body('Parse_email_topic_JSON')?['msdynmkt_name']"
+                                    }
+                                },
+                                "Append_to_email_topic_array": {
+                                    "runAfter": {
+                                        "Compose_email_Topic_entry": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "AppendToArrayVariable",
+                                    "inputs": {
+                                        "name": "topics_email",
+                                        "value": "@outputs('Compose_email_Topic_entry')"
+                                    }
+                                },
+                                "check_email_cpc_for_topic_": {
+                                    "runAfter": {
+                                        "Parse_email_topic_JSON": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "JavaScriptCode",
+                                    "inputs": {
+                                        "code": "var cpc = workflowContext.actions.Parse_cpc_array.outputs.body;\r\n\r\nresult = \"\";\r\n\r\ncpc.forEach(item=>{\r\n  if((item._msdynmkt_topicid_value == workflowContext.actions.parse_email_topic_json.outputs.body.msdynmkt_topicid) && (item.msdynmkt_contactpointtype == \"534120000\"))\r\n    result =  item;\r\n});\r\nreturn result;"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_email_Topics_array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        },
+                        "select_email_commercial_purpose": {
+                            "runAfter": {
+                                "For_each_email_topic": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Query",
+                            "inputs": {
+                                "from": "@body('Read_Purposes_for_Profile')?['value']",
+                                "where": "@equals(item()?['msdynmkt_type'],534120000)"
+                            }
+                        },
+                        "check_email_cpc_for_commercial_purpose": {
+                            "runAfter": {
+                                "select_email_commercial_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "JavaScriptCode",
+                            "inputs": {
+                                "code": "var cpc = workflowContext.actions.Parse_cpc_array.outputs.body;\r\n\r\nresult = \"\";\r\n\r\ncpc.forEach(item=>{\r\n  if((item._msdynmkt_purposeid_value == workflowContext.actions.select_email_commercial_purpose.outputs.body[0].msdynmkt_purposeid) && (item.msdynmkt_contactpointtype == \"534120000\"))\r\n    result =  item;\r\n});\r\nreturn result;"
+                            }
+                        },
+                        "Compose_email_commercial_purpose": {
+                            "runAfter": {
+                                "check_email_cpc_for_commercial_purpose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": {
+                                "msdynmkt_purposeid": "@{body('select_email_commercial_purpose')[0]?['msdynmkt_purposeid']}",
+                                "msdynmkt_name": "@{body('select_email_commercial_purpose')[0]?['msdynmkt_name']}",
+                                "msdynmkt_type": "@body('select_email_commercial_purpose')[0]?['msdynmkt_type']",
+                                "msdynmkt_contactpointconsent4id": "@if(empty(body('check_email_cpc_for_commercial_purpose')),'',body('check_email_cpc_for_commercial_purpose')?['msdynmkt_contactpointconsent4id'])",
+                                "msdynmkt_value": "@if(empty(body('check_email_cpc_for_commercial_purpose')),'',body('check_email_cpc_for_commercial_purpose')?['msdynmkt_value'])",
+                                "topics": "@variables('topics_email')"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "commondataservice": {
+                                "id": "/subscriptions/<<your subscription ID>>/providers/Microsoft.Web/locations/northeurope/managedApis/commondataservice",
+                                "connectionId": "[parameters('connections_commondataservice_2_externalid')]",
+                                "connectionName": "commondataservice-2"
+                            },
+                            "commondataservice-1": {
+                                "id": "/subscriptions/<<your subscription ID>>/providers/Microsoft.Web/locations/northeurope/managedApis/commondataservice",
+                                "connectionId": "[parameters('connections_commondataservice_1_externalid')]",
+                                "connectionName": "commondataservice-1"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
