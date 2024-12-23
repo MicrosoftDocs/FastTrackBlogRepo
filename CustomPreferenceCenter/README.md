@@ -7,8 +7,7 @@ The intention of this article and the sample implementation was to demonstrate h
 - show all relevant contact points at once 
 - display a 3-state checkbox (opt-in, opt-out, no information)
 
-The following short demo video shows the details and how the custom preference center works. \
-![Demo Video](/CustomPreferenceCenter/assets/Custom%20Preference%20Center%20Demo%20final.mp4)
+The following short [Demo Video](/CustomPreferenceCenter/assets/CustomPreferenceCenterDemo_final.mp4) shows the details and how the custom preference center works. 
 
 The implemenation is divided into 3 parts: 
 - the UI in Power Pages
@@ -62,10 +61,4 @@ The second Logic app retrieves the submited values. For each of the changes, we 
 
 ![Azure Logic app to upsert consent](/CustomPreferenceCenter/assets/updateconsent.jpg).
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
