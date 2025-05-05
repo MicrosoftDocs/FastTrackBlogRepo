@@ -18,7 +18,7 @@ namespace BPSTest
                 return 0L;
             }
 
-            var paths = directoryClient.GetPathsBpsFriendlyAsync();
+            var paths = directoryClient.GetPaths(recursive: true);
 
             await Parallel.ForEachAsync(
                 paths,
@@ -46,7 +46,7 @@ namespace BPSTest
 
                         if (File.Exists(localPath))
                         {
-                            if (path.LastModified.HasValue && File.GetLastWriteTime(localPath) >= path.LastModified.Value)
+                            if (File.GetLastWriteTime(localPath) >= path.LastModified)
                             {
                                 Console.WriteLine("Skipping download of file {0} because it's not older than the file in MDL.", path.Name);
                                 return;
@@ -70,10 +70,7 @@ namespace BPSTest
                             downloadedSize += path.ContentLength!.Value;
                         }
 
-                        if (path.LastModified.HasValue)
-                        {
-                            File.SetLastWriteTime(localPath, path.LastModified.Value);
-                        }
+                        File.SetLastWriteTime(localPath, path.LastModified.UtcDateTime);
                     }
                 });
 
