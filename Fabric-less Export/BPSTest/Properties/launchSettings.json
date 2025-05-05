@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BPSTest.ADLS": {
+      "commandName": "Project",
+      "commandLineArgs": "https://<<yourorg>>.crm4.dynamics.com/ C:\\<<yourdownloadpath>>"
+    }
+  }
+}
